@@ -8,6 +8,8 @@ extension User {
             return try authenticate(accessToken: accessToken)
         } else if let identifier = credentials as? Identifier {
             return try authenticate(identifier: identifier)
+        } else if let usernames = credentials as? UsernamePassword {
+            return try authenticate(usernames: usernames)
         } else {
             throw AuthError.unsupportedCredentials
         }
@@ -47,6 +49,19 @@ extension User {
             throw AuthError.invalidCredentials
         }
 
+        return match
+    }
+    
+    public static func authenticate(usernames: UsernamePassword) throws -> User {
+        guard
+            let match = try Self
+                .query()
+                .filter("email", usernames.username)
+                .first()
+            else {
+                throw AuthError.invalidCredentials
+        }
+        
         return match
     }
 }
